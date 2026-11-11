@@ -1,66 +1,8 @@
 const DEMO_KEY = 'pvcSheetReader_demo_v1';
       const CONFIG_KEY = 'pvcSheetReader_config';
       const STUDENTS_KEY = 'pvcSheetReader_students';
-      const COLUMNS_KEY = 'pvcSheetReader_columns';
-      const DEMO_STUDENTS = [
-          { id: 'HS001', name: 'Nguyễn Minh Anh', className: 'Lớp 3A', guardian: 'Nguyễn Văn Bình', phone: '0901 234 567', email: 'binh.nguyen@example.test', birthDate: '2017-04-12', notes: 'Dị ứng hải sản' },
-          { id: 'HS002', name: 'Trần Gia Bảo', className: 'Lớp 3A', guardian: 'Trần Thu Hà', phone: '0902 345 678', email: 'ha.tran@example.test', birthDate: '2017-08-03', notes: '' },
-          { id: 'HS003', name: 'Lê Khánh Linh', className: 'Lớp 4B', guardian: 'Lê Hoàng Nam', phone: '0903 456 789', email: 'nam.le@example.test', birthDate: '2016-11-25', notes: 'Đón trẻ sau 16:00' },
-          { id: 'HS004', name: 'Phạm Đức Minh', className: 'Lớp 5A', guardian: 'Phạm Thu Trang', phone: '0904 567 890', email: 'trang.pham@example.test', birthDate: '2015-02-14', notes: '' },
-          { id: 'HS005', name: 'Đỗ Bảo Ngọc', className: 'Lớp 2B', guardian: 'Đỗ Quang Huy', phone: '0905 678 901', email: 'huy.do@example.test', birthDate: '2018-06-30', notes: '' }
-      ];
-      const DEFAULT_COLUMNS = [
-          { key: 'id', label: 'Mã học sinh', type: 'text', visible: true, editable: false, required: true },
-          { key: 'name', label: 'Họ và tên', type: 'text', visible: true, editable: false, required: true },
-          { key: 'className', label: 'Lớp', type: 'text', visible: true, editable: false, required: false },
-          { key: 'guardian', label: 'Tên phụ huynh', type: 'text', visible: true, editable: true, required: true },
-          { key: 'phone', label: 'Số điện thoại', type: 'phone', visible: true, editable: true, required: true },
-          { key: 'email', label: 'Email', type: 'email', visible: true, editable: true, required: false },
-          { key: 'birthDate', label: 'Ngày sinh', type: 'date', visible: true, editable: true, required: false },
-          { key: 'notes', label: 'Ghi chú', type: 'text', visible: true, editable: true, required: false }
-      ];
-      const DEMO_TABLES = [
-          {
-              name: 'DANH SACH HOC SINH',
-              objectCaption: 'Học sinh',
-              columns: structuredCloneSafe(DEFAULT_COLUMNS),
-              records: structuredCloneSafe(DEMO_STUDENTS)
-          },
-          {
-              name: 'DANH SACH CBCNV',
-              objectCaption: 'Cán bộ, nhân viên',
-              columns: [
-                  { key: 'id', label: 'Mã nhân viên', type: 'text', visible: true, editable: false, required: true },
-                  { key: 'name', label: 'Họ và tên', type: 'text', visible: true, editable: false, required: true },
-                  { key: 'department', label: 'Phòng ban', type: 'text', visible: true, editable: true, required: false },
-                  { key: 'position', label: 'Chức vụ', type: 'text', visible: true, editable: true, required: false },
-                  { key: 'phone', label: 'Số điện thoại', type: 'phone', visible: true, editable: true, required: false },
-                  { key: 'email', label: 'Email', type: 'email', visible: true, editable: true, required: false }
-              ],
-              records: [
-                  { id: 'NV001', name: 'Nguyễn Thanh Hà', department: 'Kế toán', position: 'Kế toán trưởng', phone: '0912 345 678', email: 'ha.nguyen@example.test' },
-                  { id: 'NV002', name: 'Trần Quốc Dũng', department: 'Kỹ thuật', position: 'Chuyên viên', phone: '0913 456 789', email: 'dung.tran@example.test' },
-                  { id: 'NV003', name: 'Lê Thu Hương', department: 'Nhân sự', position: 'Trưởng phòng', phone: '0914 567 890', email: 'huong.le@example.test' }
-              ]
-          },
-          {
-              name: 'DANH SACH KHACH HANG',
-              objectCaption: 'Khách hàng',
-              columns: [
-                  { key: 'id', label: 'Mã khách hàng', type: 'text', visible: true, editable: false, required: true },
-                  { key: 'name', label: 'Tên khách hàng', type: 'text', visible: true, editable: false, required: true },
-                  { key: 'company', label: 'Công ty', type: 'text', visible: true, editable: true, required: false },
-                  { key: 'phone', label: 'Số điện thoại', type: 'phone', visible: true, editable: true, required: false },
-                  { key: 'email', label: 'Email', type: 'email', visible: true, editable: true, required: false },
-                  { key: 'notes', label: 'Ghi chú', type: 'text', visible: true, editable: true, required: false }
-              ],
-              records: [
-                  { id: 'KH001', name: 'Công ty Minh Phát', company: 'Minh Phát', phone: '0921 111 222', email: 'lienhe@minhphat.example.test', notes: 'Khách hàng doanh nghiệp' },
-                  { id: 'KH002', name: 'Trần Ngọc Mai', company: 'Cá nhân', phone: '0922 333 444', email: 'mai.tran@example.test', notes: '' },
-                  { id: 'KH003', name: 'Công ty An Bình', company: 'An Bình', phone: '0923 555 666', email: 'info@anbinh.example.test', notes: 'Liên hệ giờ hành chính' }
-              ]
-          }
-      ];
+      const COLUMNS_KEY = 'pvcSheetReader_columns';      
+      
       const TYPE_OPTIONS = [
           ['text', 'Văn bản'], ['number', 'Số'], ['date', 'Ngày'], ['email', 'Email'], ['phone', 'Điện thoại'], ['boolean', 'Có/Không']
       ];
@@ -69,13 +11,14 @@ const DEMO_KEY = 'pvcSheetReader_demo_v1';
 
       window.APP = window.APP || {};
       const requestedMode = window.PVC_APP_MODE || new URLSearchParams(location.search).get('mode');
-      APP.mode = requestedMode === 'demo' ? 'demo' : requestedMode === 'live' || IS_GAS ? 'live' : 'demo';
+      APP.mode = 'live';
       APP.state = APP.state || {};
       APP.state.page = PAGE;
       APP.state.selectedStudentId = '';
       APP.state.search = '';
 
-      function safeRead(key, fallback) {
+      function safeRead(key, fallback) 
+      {
           try {
               const value = localStorage.getItem(key);
               return value === null ? fallback : JSON.parse(value);
@@ -85,7 +28,8 @@ const DEMO_KEY = 'pvcSheetReader_demo_v1';
           }
       }
 
-      function safeWrite(key, value) {
+      function safeWrite(key, value) 
+      {
           try {
               localStorage.setItem(key, JSON.stringify(value));
           } catch (error) {
@@ -94,7 +38,8 @@ const DEMO_KEY = 'pvcSheetReader_demo_v1';
           }
       }
 
-      function validStore(value) {
+      function validStore(value) 
+      {
           return value && typeof value === 'object' && (
               (Array.isArray(value.sheets) && value.sheets.length > 0 && value.sheets.every(sheet =>
                   sheet && sheet.config && typeof sheet.config === 'object' &&
@@ -105,7 +50,8 @@ const DEMO_KEY = 'pvcSheetReader_demo_v1';
           );
       }
 
-      function initialStore() {
+      function initialStore() 
+      {
           const table = DEMO_TABLES[0];
           const sheet = {
               config: {
@@ -125,18 +71,21 @@ const DEMO_KEY = 'pvcSheetReader_demo_v1';
           return { sheets: [sheet], activeSheetId: sheet.config.key };
       }
 
-      function emptyStats() {
+      function emptyStats() 
+      {
           return { viewCount: 0, addCount: 0, updateCount: 0, lastViewedAt: '', lastChangedAt: '' };
       }
 
-      function normalizeStats(stats) {
+      function normalizeStats(stats) 
+      {
           return {
               ...emptyStats(),
               ...(stats && typeof stats === 'object' ? stats : {})
           };
       }
 
-      function normalizeStore(store) {
+      function normalizeStore(store) 
+      {
           if (Array.isArray(store.sheets) && store.sheets.length) {
               store.sheets.forEach(sheet => {
                   sheet.config.tableName = sheet.config.tableName || DEMO_TABLES[0].name;

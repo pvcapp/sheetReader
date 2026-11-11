@@ -99,7 +99,8 @@ function showStudentForm(student) {
           target.dataset.kind = kind;
       }
 
-      async function saveStudent(form, oldStudent, isNew, backdrop) {
+      async function saveStudent(form, oldStudent, isNew, backdrop) 
+      {
           setFormStatus(form, '');
           const store = currentStore();
           const result = oldStudent ? { ...oldStudent } : {};
