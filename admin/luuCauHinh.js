@@ -21,7 +21,7 @@
                       ...state.form,
                       columns: state.columns.map(column => ({ ...column }))
                   });
-                  await loadRecentSheets();
+                  await taiDanhSachTrangTinhGanDay();
                   return saved;
               });
               setMessage(`Đã lưu cấu hình lúc ${new Date(result.savedAt).toLocaleString('vi-VN')}.`, 'success');

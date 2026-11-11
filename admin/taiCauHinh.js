@@ -1,54 +1,54 @@
-      function renderRecentSheetsCard() {
-          const card = element('section', 'reader-card');
-          card.id = 'saved-configurations';
-          card.tabIndex = -1;
-          card.append(element('h2', '', 'Cấu hình đã lưu'));
+      function hienThiTheTrangTinhGanDay() {
+          const the = element('section', 'reader-card');
+          the.id = 'saved-configurations';
+          the.tabIndex = -1;
+          the.append(element('h2', '', 'Cấu hình đã lưu'));
           if (!state.recentSheets.length) {
-              card.append(element('p', 'reader-help', 'Chưa có cấu hình nào được lưu.'));
-              return card;
+              the.append(element('p', 'reader-help', 'Chưa có cấu hình nào được lưu.'));
+              return the;
           }
-          const list = element('div', 'reader-recent-sheets');
-          state.recentSheets.forEach(sheet => {
-              const row = element('div', 'reader-recent-sheet');
-              const info = element('div');
-              info.append(
-                  element('strong', '', sheet.caption || sheet.tableName),
-                  element('span', 'reader-help', `${sheet.objectCaption} · ${sheet.recordCount} bản ghi · ${sheet.columns} cột`)
+          const danhSach = element('div', 'reader-recent-sheets');
+          state.recentSheets.forEach(trangTinh => {
+              const dong = element('div', 'reader-recent-sheet');
+              const thongTin = element('div');
+              thongTin.append(
+                  element('strong', '', trangTinh.caption || trangTinh.tableName),
+                  element('span', 'reader-help', `${trangTinh.objectCaption} · ${trangTinh.recordCount} bản ghi · ${trangTinh.columns} cột`)
               );
-              const edit = element('button', 'reader-button secondary small', 'Chỉnh sửa');
-              edit.type = 'button';
-              edit.addEventListener('click', () => loadSavedConfiguration(sheet));
-              row.append(info, edit);
-              list.append(row);
+              const nutSua = element('button', 'reader-button secondary small', 'Chỉnh sửa');
+              nutSua.type = 'button';
+              nutSua.addEventListener('click', () => napCauHinhDaLuu(trangTinh));
+              dong.append(thongTin, nutSua);
+              danhSach.append(dong);
           });
-          card.append(list);
-          return card;
+          the.append(danhSach);
+          return the;
       }
 
-      async function loadRecentSheets() {
+      async function taiDanhSachTrangTinhGanDay() {
           state.recentSheets = await callServer('adminListRecentSheets');
       }
 
-      async function loadSavedConfiguration(sheet) {
+      async function napCauHinhDaLuu(trangTinh) {
           try {
               await withLoading(async () => {
-                  const configuration = await callServer('adminGetConfiguration', sheet.spreadsheetId, sheet.tableName);
-                  const result = await callServer('adminListTables', sheet.spreadsheetId);
+                  const cauHinh = await callServer('adminGetConfiguration', trangTinh.spreadsheetId, trangTinh.tableName);
+                  const ketQua = await callServer('adminListTables', trangTinh.spreadsheetId);
                   state.form = {
-                      spreadsheetId: configuration.spreadsheetId,
-                      tableName: configuration.tableName,
-                      caption: configuration.caption,
-                      objectCaption: configuration.objectCaption,
-                      allowNew: configuration.allowNew
+                      spreadsheetId: cauHinh.spreadsheetId,
+                      tableName: cauHinh.tableName,
+                      caption: cauHinh.caption,
+                      objectCaption: cauHinh.objectCaption,
+                      allowNew: cauHinh.allowNew
                   };
-                  state.tables = result.tables;
-                  state.spreadsheetName = result.spreadsheetName;
-                  state.columns = configuration.columns;
+                  state.tables = ketQua.tables;
+                  state.spreadsheetName = ketQua.spreadsheetName;
+                  state.columns = cauHinh.columns;
                   state.step = 4;
               });
               setMessage('Đã nạp cấu hình đã lưu.', 'success');
-          } catch (error) {
-              setMessage(error.message, 'error');
+          } catch (loi) {
+              setMessage(loi.message, 'error');
           }
           render();
       }

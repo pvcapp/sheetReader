@@ -183,7 +183,7 @@
           if (state.step === 2) page.append(renderStepTwo());
           if (state.step === 3) page.append(renderStepThree());
           if (state.step === 4) page.append(renderStepFour());
-          page.append(renderRecentSheetsCard());
+          page.append(hienThiTheTrangTinhGanDay());
           const status = element('div', 'reader-status');
           status.id = 'reader-status';
           status.setAttribute('role', 'status');
@@ -215,7 +215,7 @@
       async function start() {
           render();
           try {
-              await withLoading(loadRecentSheets);
+              await withLoading(taiDanhSachTrangTinhGanDay);
               render();
           } catch (error) {
               setMessage(error.message, 'error');
