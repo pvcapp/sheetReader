@@ -1,9 +1,12 @@
 function showStudentForm(student) {
-          if (!requireDemo()) return;
-          const isNew = !student;
-          if (isNew && !currentStore().config.allowNew) {
-              status('Cấu hình hiện không cho phép thêm bản ghi mới.', 'error');
-              return;
+    const isNew = !student;
+    if (isNew && APP.mode !== 'demo') {
+        status('Chế độ trực tiếp hiện chỉ cho phép cập nhật bản ghi.', 'error');
+        return;
+    }
+    if (isNew && !currentStore().config.allowNew) {
+        status('Cấu hình hiện không cho phép thêm bản ghi mới.', 'error');
+        return;
           }
           const backdrop = el('div', 'reader-modal-backdrop');
           backdrop.id = 'student-modal';
@@ -25,7 +28,11 @@ function showStudentForm(student) {
           const grid = el('div', 'reader-form-grid');
           const columns = currentStore().columns.filter(column => isNew
               ? column.visible || column.required
-              : column.editable);
+              : column.editable && column.visible);
+          if (!columns.length) {
+              status('Chưa có cột nào được bật cho phép cập nhật.', 'error');
+              return;
+          }
           columns.forEach(column => {
               const type = column.type === 'date' ? 'date' : column.type === 'email' ? 'email' : column.type === 'number' ? 'number' : 'text';
               const field = inputField({
@@ -64,7 +71,7 @@ function showStudentForm(student) {
           $('#field-' + columns[0]?.key, form)?.focus();
       }
 
-      function saveStudent(form, oldStudent, isNew, backdrop) {
+      async function saveStudent(form, oldStudent, isNew, backdrop) {
           const store = currentStore();
           const result = oldStudent ? { ...oldStudent } : {};
           const fields = $$('input[name], textarea[name]', form);
@@ -93,9 +100,31 @@ function showStudentForm(student) {
                   return status('Địa chỉ email chưa đúng định dạng.', 'error');
               }
           }
+          if (!isNew && (!identityColumn || !oldStudent)) {
+              return status('Không xác định được bản ghi cần cập nhật.', 'error');
+          }
+
+          const changes = {};
+          store.columns.filter(column => column.editable && column.visible).forEach(column => {
+              changes[column.key] = result[column.key] ?? '';
+          });
+          const submit = $('button[type="submit"]', form);
+          if (submit) submit.disabled = true;
+          status('Đang lưu cập nhật...');
           try {
-              if (isNew) store.students.push(result);
-              else {
+              if (isNew) {
+                  store.students.push(result);
+              } else if (APP.mode === 'live') {
+                  await APP.api.saveStudent({
+                      sheetKey: store.config.key,
+                      identityKey: identityColumn.key,
+                      identityValue: oldStudent[identityColumn.key],
+                      values: changes
+                  }, false);
+                  const index = store.students.findIndex(item => recordIdentity(item) === recordIdentity(oldStudent));
+                  if (index < 0) throw new Error('Đã lưu trên Google Sheets nhưng không tìm thấy bản ghi trong danh sách hiện tại.');
+                  store.students[index] = result;
+              } else {
                   const index = store.students.findIndex(item => recordIdentity(item) === recordIdentity(oldStudent));
                   if (index < 0) throw new Error('Không tìm thấy bản ghi cần cập nhật.');
                   store.students[index] = result;
@@ -107,7 +136,7 @@ function showStudentForm(student) {
               renderDetail();
               status(isNew ? 'Đã thêm bản ghi.' : 'Đã cập nhật thông tin.', 'success');
           } catch (error) {
+              if (submit) submit.disabled = false;
               status(error.message, 'error');
           }
       }
-

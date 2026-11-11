@@ -285,7 +285,7 @@ const DEMO_KEY = 'pvcSheetReader_demo_v1';
               return this.invoke('sv_pvcReader_saveConfig', config);
           },
           saveStudent(student, isNew) {
-              return this.invoke(isNew ? 'sv_pvcReader_addStudent' : 'sv_pvcReader_updateStudent', student);
+              return this.invoke(isNew ? 'clientAddRecord' : 'clientUpdateRecord', student);
           }
       };
 

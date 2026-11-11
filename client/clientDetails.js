@@ -22,7 +22,9 @@ function renderDetail() {
           const close = el('button', 'reader-button secondary small reader-detail-close', 'OK');
           close.type = 'button';
           close.addEventListener('click', closeStudentDetail);
-          if (APP.mode === 'demo') {
+          if (currentStore().columns.some(column =>
+              column.editable && (APP.mode === 'demo' || column.visible)
+          )) {
               const edit = el('button', 'reader-button small', 'Cập nhật');
               edit.type = 'button';
               edit.addEventListener('click', () => showStudentForm(student));
