@@ -49,6 +49,11 @@ function showStudentForm(student) {
               grid.prepend(inputField({ key: 'id', label: 'Mã bản ghi', value: `ID${String(Date.now()).slice(-5)}`, required: true }));
           }
           form.append(grid);
+          const formStatus = el('div', 'reader-status');
+          formStatus.id = 'student-form-status';
+          formStatus.setAttribute('role', 'status');
+          formStatus.setAttribute('aria-live', 'polite');
+          form.append(formStatus);
           const actions = el('div', 'reader-actions');
           actions.style.justifyContent = 'flex-end';
           const cancel = el('button', 'reader-button secondary', 'Hủy');
@@ -60,7 +65,23 @@ function showStudentForm(student) {
           form.append(actions);
           form.addEventListener('submit', event => {
               event.preventDefault();
-              saveStudent(form, student, isNew, backdrop);
+              saveStudent(form, student, isNew, backdrop).catch(error => {
+                  console.error('Không thể lưu bản ghi:', error);
+                  setFormStatus(form, error.message || 'Không thể lưu bản ghi.', 'error');
+              });
+          });
+          form.addEventListener('invalid', event => {
+              const label = event.target.labels?.[0]?.textContent?.replace(/\s*\*$/, '');
+              setFormStatus(form, label
+                  ? `Vui lòng kiểm tra trường "${label}".`
+                  : 'Vui lòng kiểm tra các trường bắt buộc.', 'error');
+          }, true);
+          form.addEventListener('input', () => {
+              const message = $('#student-form-status', form);
+              if (message?.dataset.kind === 'error') {
+                  message.textContent = '';
+                  message.dataset.kind = '';
+              }
           });
           backdrop.addEventListener('click', event => {
               if (event.target === backdrop) backdrop.remove();
@@ -71,7 +92,15 @@ function showStudentForm(student) {
           $('#field-' + columns[0]?.key, form)?.focus();
       }
 
+      function setFormStatus(form, message, kind = 'info') {
+          const target = $('#student-form-status', form);
+          if (!target) return;
+          target.textContent = message;
+          target.dataset.kind = kind;
+      }
+
       async function saveStudent(form, oldStudent, isNew, backdrop) {
+          setFormStatus(form, '');
           const store = currentStore();
           const result = oldStudent ? { ...oldStudent } : {};
           const fields = $$('input[name], textarea[name]', form);
@@ -81,27 +110,27 @@ function showStudentForm(student) {
           const displayColumn = store.columns.find(column => column.key === 'name') ||
               store.columns.find(column => column.required && column.key !== identityColumn?.key);
           if (identityColumn && !attr(result[identityColumn.key]).trim()) {
-              return status(`${identityColumn.label} không được để trống.`, 'error');
+              return setFormStatus(form, `${identityColumn.label} không được để trống.`, 'error');
           }
           if (displayColumn && !attr(result[displayColumn.key]).trim()) {
-              return status(`${displayColumn.label} không được để trống.`, 'error');
+              return setFormStatus(form, `${displayColumn.label} không được để trống.`, 'error');
           }
           if (identityColumn && store.students.some(item =>
               item[identityColumn.key] === result[identityColumn.key] &&
               item[identityColumn.key] !== oldStudent?.[identityColumn.key]
           )) {
-              return status(`${identityColumn.label} đã tồn tại. Vui lòng nhập giá trị khác.`, 'error');
+              return setFormStatus(form, `${identityColumn.label} đã tồn tại. Vui lòng nhập giá trị khác.`, 'error');
           }
           for (const column of store.columns.filter(item => item.editable || (isNew && item.required))) {
               if (column.required && !attr(result[column.key]).trim()) {
-                  return status(`Vui lòng nhập ${column.label.toLowerCase()}.`, 'error');
+                  return setFormStatus(form, `Vui lòng nhập ${column.label.toLowerCase()}.`, 'error');
               }
               if (column.type === 'email' && result[column.key] && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(result[column.key])) {
-                  return status('Địa chỉ email chưa đúng định dạng.', 'error');
+                  return setFormStatus(form, 'Địa chỉ email chưa đúng định dạng.', 'error');
               }
           }
           if (!isNew && (!identityColumn || !oldStudent)) {
-              return status('Không xác định được bản ghi cần cập nhật.', 'error');
+              return setFormStatus(form, 'Không xác định được bản ghi cần cập nhật.', 'error');
           }
 
           const changes = {};
@@ -109,8 +138,11 @@ function showStudentForm(student) {
               changes[column.key] = result[column.key] ?? '';
           });
           const submit = $('button[type="submit"]', form);
-          if (submit) submit.disabled = true;
-          status('Đang lưu cập nhật...');
+          if (submit) {
+              submit.disabled = true;
+              submit.textContent = 'Đang lưu...';
+          }
+          setFormStatus(form, 'Đang lưu cập nhật...');
           try {
               if (isNew) {
                   store.students.push(result);
@@ -136,7 +168,10 @@ function showStudentForm(student) {
               renderDetail();
               status(isNew ? 'Đã thêm bản ghi.' : 'Đã cập nhật thông tin.', 'success');
           } catch (error) {
-              if (submit) submit.disabled = false;
-              status(error.message, 'error');
+              if (submit) {
+                  submit.disabled = false;
+                  submit.textContent = isNew ? 'Thêm bản ghi' : 'Lưu cập nhật';
+              }
+              setFormStatus(form, error.message || 'Không thể lưu bản ghi.', 'error');
           }
       }
